@@ -124,7 +124,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
           ..id = 'audio_RTCVideoRenderer-$textureId'
           ..muted = stream.ownerTag == 'local'
           ..autoplay = true;
-        getAudioManageDiv().append(_audioElement!);
+        _ensureAudioManagerDiv().append(_audioElement!);
       }
       _audioElement?.srcObject = _audioStream;
     }
@@ -134,15 +134,14 @@ class RTCVideoRendererWeb extends VideoRenderer {
     value = value.copyWith(renderVideo: renderVideo);
   }
 
-  html.DivElement getAudioManageDiv() {
+  html.DivElement _ensureAudioManagerDiv() {
     var div = html.document.getElementById('html_webrtc_audio_manage_list');
-    if (null != div) {
-      return div as html.DivElement;
-    }
+    if (null != div) return div as html.DivElement;
+
     div = html.DivElement();
     div.id = 'html_webrtc_audio_manage_list';
     div.style.display = 'none';
-    html.document.body!.append(div);
+    html.document.body?.append(div);
     return div as html.DivElement;
   }
 
@@ -172,8 +171,8 @@ class RTCVideoRendererWeb extends VideoRenderer {
     element?.removeAttribute('src');
     element?.load();
     _audioElement?.remove();
-    final audioManager = getAudioManageDiv();
-    if (!audioManager.hasChildNodes()) audioManager.remove();
+    final audioManager = html.document.getElementById('html_webrtc_audio_manage_list') as html.DivElement?;
+    if (audioManager != null && !audioManager.hasChildNodes()) audioManager.remove();
     return super.dispose();
   }
 
