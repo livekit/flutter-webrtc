@@ -35,6 +35,8 @@ const String _kDefaultErrorMessage =
 class RTCVideoRendererWeb extends VideoRenderer {
   RTCVideoRendererWeb() : _textureId = _textureCounter++;
 
+  static const _elementIdForAudioManager = 'html_webrtc_audio_manager_list';
+
   html.AudioElement? _audioElement;
 
   static int _textureCounter = 1;
@@ -75,6 +77,9 @@ class RTCVideoRendererWeb extends VideoRenderer {
 
   @override
   bool get renderVideo => _srcObject != null;
+
+  String get _elementIdForAudio => 'audio_RTCVideoRenderer-$textureId';
+  String get _elementIdForVideo => 'video_RTCVideoRenderer-$textureId';
 
   void _updateAllValues() {
     var element = findHtmlView();
@@ -121,7 +126,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
     if (null != _audioStream) {
       if (null == _audioElement) {
         _audioElement = html.AudioElement()
-          ..id = 'audio_RTCVideoRenderer-$textureId'
+          ..id = _elementIdForAudio
           ..muted = stream.ownerTag == 'local'
           ..autoplay = true;
         _ensureAudioManagerDiv().append(_audioElement!);
@@ -135,11 +140,11 @@ class RTCVideoRendererWeb extends VideoRenderer {
   }
 
   html.DivElement _ensureAudioManagerDiv() {
-    var div = html.document.getElementById('html_webrtc_audio_manage_list');
+    var div = html.document.getElementById(_elementIdForAudioManager);
     if (null != div) return div as html.DivElement;
 
     div = html.DivElement();
-    div.id = 'html_webrtc_audio_manage_list';
+    div.id = _elementIdForAudioManager;
     div.style.display = 'none';
     html.document.body?.append(div);
     return div as html.DivElement;
@@ -147,7 +152,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
 
   html.VideoElement? findHtmlView() {
     var video =
-        html.document.getElementById('video_RTCVideoRenderer-$textureId');
+        html.document.getElementById(_elementIdForVideo);
     if (null != video) {
       return video as html.VideoElement;
     }
@@ -155,7 +160,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
     if (fltPv.isEmpty) return null;
     var child = (fltPv.first as html.Element).shadowRoot!.childNodes;
     for (var item in child) {
-      if ((item as html.Element).id == 'video_RTCVideoRenderer-$textureId') {
+      if ((item as html.Element).id == _elementIdForVideo) {
         return item as html.VideoElement;
       }
     }
@@ -171,7 +176,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
     element?.removeAttribute('src');
     element?.load();
     _audioElement?.remove();
-    final audioManager = html.document.getElementById('html_webrtc_audio_manage_list') as html.DivElement?;
+    final audioManager = html.document.getElementById(_elementIdForAudioManager) as html.DivElement?;
     if (audioManager != null && !audioManager.hasChildNodes()) audioManager.remove();
     return super.dispose();
   }
@@ -194,9 +199,8 @@ class RTCVideoRendererWeb extends VideoRenderer {
 
   @override
   Future<void> initialize() async {
-    var id = 'RTCVideoRenderer-$textureId';
     // // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(id, (int viewId) {
+    ui.platformViewRegistry.registerViewFactory('RTCVideoRenderer-$textureId', (int viewId) {
       _subscriptions.forEach((s) => s.cancel());
       _subscriptions.clear();
 
@@ -209,7 +213,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
         ..style.width = '100%'
         ..style.height = '100%'
         ..srcObject = _videoStream
-        ..id = 'video_$id'
+        ..id = _elementIdForVideo
         ..setAttribute('playsinline', 'true');
 
       _subscriptions.add(
