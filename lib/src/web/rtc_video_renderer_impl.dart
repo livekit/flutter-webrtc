@@ -172,6 +172,8 @@ class RTCVideoRendererWeb extends VideoRenderer {
     element?.removeAttribute('src');
     element?.load();
     html.document.getElementById('audio_RTCVideoRenderer-$textureId')?.remove();
+    final audioManager = getAudioManageDiv();
+    if (!audioManager.hasChildNodes()) audioManager.remove();
     return super.dispose();
   }
 
