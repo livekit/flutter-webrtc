@@ -82,7 +82,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
   String get _elementIdForVideo => 'video_RTCVideoRenderer-$textureId';
 
   void _updateAllValues() {
-    var element = findHtmlView();
+    final element = findHtmlView();
     value = value.copyWith(
       rotation: 0,
       width: element?.videoWidth.toDouble() ?? 0.0,
@@ -108,13 +108,13 @@ class RTCVideoRendererWeb extends VideoRenderer {
     if (null != _srcObject) {
       if (stream.getVideoTracks().isNotEmpty) {
         _videoStream = html.MediaStream();
-        for (var track in _srcObject!.jsStream.getVideoTracks()) {
+        for (final track in _srcObject!.jsStream.getVideoTracks()) {
           _videoStream!.addTrack(track);
         }
       }
       if (stream.getAudioTracks().isNotEmpty) {
         _audioStream = html.MediaStream();
-        for (var track in _srcObject!.jsStream.getAudioTracks()) {
+        for (final track in _srcObject!.jsStream.getAudioTracks()) {
           _audioStream!.addTrack(track);
         }
       }
@@ -143,23 +143,21 @@ class RTCVideoRendererWeb extends VideoRenderer {
     var div = html.document.getElementById(_elementIdForAudioManager);
     if (null != div) return div as html.DivElement;
 
-    div = html.DivElement();
-    div.id = _elementIdForAudioManager;
-    div.style.display = 'none';
+    div = html.DivElement()
+      ..id = _elementIdForAudioManager
+      ..style.display = 'none';
     html.document.body?.append(div);
     return div as html.DivElement;
   }
 
   html.VideoElement? findHtmlView() {
-    var video =
-        html.document.getElementById(_elementIdForVideo);
-    if (null != video) {
-      return video as html.VideoElement;
-    }
+    final video = html.document.getElementById(_elementIdForVideo);
+    if (null != video) return video as html.VideoElement;
+
     final fltPv = html.document.getElementsByTagName('flt-platform-view');
     if (fltPv.isEmpty) return null;
-    var child = (fltPv.first as html.Element).shadowRoot!.childNodes;
-    for (var item in child) {
+    final child = (fltPv.first as html.Element).shadowRoot!.childNodes;
+    for (final item in child) {
       if ((item as html.Element).id == _elementIdForVideo) {
         return item as html.VideoElement;
       }
@@ -172,7 +170,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
     await _srcObject?.dispose();
     _srcObject = null;
     _subscriptions.forEach((s) => s.cancel());
-    var element = findHtmlView();
+    final element = findHtmlView();
     element?.removeAttribute('src');
     element?.load();
     _audioElement?.remove();
@@ -184,7 +182,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
   @override
   Future<bool> audioOutput(String deviceId) async {
     try {
-      var element = findHtmlView();
+      final element = findHtmlView();
       if (null != element && jsutil.hasProperty(element, 'setSinkId')) {
         await jsutil.promiseToFuture<void>(
             jsutil.callMethod(element, 'setSinkId', [deviceId]));
@@ -204,7 +202,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
       _subscriptions.forEach((s) => s.cancel());
       _subscriptions.clear();
 
-      var element = html.VideoElement()
+      final element = html.VideoElement()
         ..autoplay = true
         ..muted = true
         ..controls = false
@@ -237,7 +235,7 @@ class RTCVideoRendererWeb extends VideoRenderer {
           // The Event itself (_) doesn't contain info about the actual error.
           // We need to look at the HTMLMediaElement.error.
           // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/error
-          var error = element.error;
+          final error = element.error;
           print('RTCVideoRenderer: videoElement.onError, ${error.toString()}');
           throw PlatformException(
             code: _kErrorValueToErrorName[error!.code]!,
